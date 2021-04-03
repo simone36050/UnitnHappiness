@@ -1,0 +1,82 @@
+<!DOCTYPE html>
+<html>
+    <head>
+        <title>Graduatorie notifier</title>
+
+        <meta charset="utf-8">
+        <meta name="viewport" content="width=device-width, initial-scale=1">
+
+        <link rel="stylesheet" href="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/css/bootstrap.min.css">
+        <script src="https://ajax.googleapis.com/ajax/libs/jquery/3.5.1/jquery.min.js"></script>
+        <script src="https://cdnjs.cloudflare.com/ajax/libs/popper.js/1.16.0/umd/popper.min.js"></script>
+        <script src="https://maxcdn.bootstrapcdn.com/bootstrap/4.5.2/js/bootstrap.min.js"></script>
+    </head>
+    <body>
+        <div class="container mt-3">
+            <h3>Graduatorie di informatica UNITN</h3>
+            <p>
+                Se vuoi essere informato della pubblicazione delle graduatorie 
+                di informatica all'Università di Trento puoi iscriverti qui.
+            </p>
+            <p>
+                <strong>N.B.:</strong> Questo è un servizio non ufficiale, non ho niente
+                a che fare con l'Università di Trento.
+            </p>
+            <div id="alerts">
+
+            </div>
+            <div class="input-group">
+                <input type="text" placeholder="Insert email" id="email" maxlength="250">
+                <div class="input-group-append">
+                    <button class="btn btn-outline-secondary" id="send">Invia</button>
+                </div>
+            </div>
+        </div>
+
+        <script>
+             function result(type, message) {
+                template = `<div class="alert alert-{type}" role="alert">
+                                {message}
+                            </div>`.replace('{type}', type)
+                                //   .replace('{title}', title)
+                                    .replace('{message}', message)
+                $('#alerts').append(template)
+            }
+
+            $(document).ready(function() {
+                
+                {% if warn: %}
+                    result('warning', 'I risultati sono già pubblici!')
+                {% endif %}
+
+                $('#send').click(function() {
+                    $.post("add/" + encodeURI($('#email').val()), function(res) {
+                        switch(res) {
+                            case "OK":
+                                result('info', 'Indirizzo email inserito con successo!')
+                                break;
+
+                            case "ERR1":
+                                result('warning', 'I risultati sono già pubblici!')
+                                break;
+
+                            case "ERR2":
+                                result('warning', 'Indirizzo email già presente!')
+                                break;
+
+                            case "ERR3":
+                                result('danger', "L'indirizzo email non è corretto!")
+                                break;
+                            
+                            default:
+                                result('danger', "Impossibile aggiungere l'email")
+                                break;
+                        }
+                    }).fail(function() {
+                        result('danger', "Impossibile aggiungere l'email")
+                    })
+                })
+            })
+        </script>
+    </body>
+</html>
